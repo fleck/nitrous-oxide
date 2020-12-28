@@ -18,4 +18,4 @@ goFast();
 ```
 
 ## Why?
-Sometimes our origin server are slow. Pre-fetching is a simple way to overcome this latency. You'll want to make sure your HTML responses have a `max-age=30` or similar cache control header set for this to work properly.
+Even fetches to well tuned origin servers have a decent amount of latency. Pre-fetching is a simple way to overcome this. You'll want to make sure your HTML responses have a `max-age=30` or similar cache control header set for this to work properly.

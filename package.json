@@ -1,8 +1,12 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fleck/nitrous-oxide"
+  },
   "files": [
     "dist",
     "src"
