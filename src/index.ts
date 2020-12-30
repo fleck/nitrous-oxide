@@ -1,7 +1,7 @@
 import delegate from "delegate-it";
 import { visit } from "@hotwired/turbo";
 import type { FrameElement } from "@hotwired/turbo/dist/types/elements/frame_element";
-import debounce from "lodash/debounce";
+import mem from "mem";
 
 const inflight = new Map<string, Promise<Response>>();
 
@@ -14,14 +14,14 @@ export const visitFrame = (response: Response, frameId: string) =>
         get responseHTML() {
           return response.text();
         },
-      } as any
+      } as any,
     );
 
 export const goFast = () => {
   const eligibleForPrefetch = 'a, form:not([method="post"])';
 
   (["mouseover", "touchstart"] as const).forEach((event) =>
-    delegate(document, eligibleForPrefetch, event, debounce(prefetch, 10))
+    delegate(document, eligibleForPrefetch, event, prefetch),
   );
 
   delegate(document, eligibleForPrefetch, "click", startVisit);
@@ -58,8 +58,10 @@ const startVisit = (event: delegate.Event<Event, Element>) => {
   });
 };
 
+const memoizedFetch = mem(fetch, { maxAge: 3000, cacheKey: JSON.stringify });
+
 export const turboFetch = (url: string, frameId: string | null) =>
-  fetch(url, {
+  memoizedFetch(url, {
     credentials: "include",
     headers: {
       accept: "text/html; turbo-stream, text/html, application/xhtml+xml",
@@ -98,7 +100,7 @@ const prefetch = (event: delegate.Event<Event, HTMLElement>) => {
   request.then((response) => {
     if (!response.headers.get("Cache-Control")?.includes("max-age")) {
       console.warn(
-        `Pre-fetched response from ${response.url} should include max-age.`
+        `Pre-fetched response from ${response.url} should include max-age.`,
       );
     }
   });
@@ -107,7 +109,7 @@ const prefetch = (event: delegate.Event<Event, HTMLElement>) => {
     urlWithoutHash,
     request.finally(() => {
       inflight.delete(urlWithoutHash);
-    })
+    }),
   );
 };
 
