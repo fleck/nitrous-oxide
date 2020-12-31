@@ -57,6 +57,7 @@
     "@types/lodash": "^4.14.166",
     "delegate-it": "^2.0.2",
     "lodash": "^4.17.20",
+    "lodash-es": "^4.17.20",
     "mem": "^8.0.0"
   },
   "resolutions": {
