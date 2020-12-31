@@ -2,6 +2,7 @@ import delegate from "delegate-it";
 import { visit } from "@hotwired/turbo";
 import type { FrameElement } from "@hotwired/turbo/dist/types/elements/frame_element";
 import mem from "mem";
+import debounce from "lodash/debounce";
 
 const inflight = new Map<string, Promise<Response>>();
 
@@ -17,18 +18,33 @@ export const visitFrame = (response: Response, frameId: string) =>
       } as any,
     );
 
-export const goFast = () => {
-  const idempotentFormSelector = 'form:not([method="post"])';
-
+export const goFast = ({
+  keyupDebounce = 150,
+  onkeyup = true,
+  idempotentFormSelector = 'form:not([method="post"])',
+  anchorSelector = "a",
+}) => {
   (["mouseover", "touchstart"] as const).forEach((event) =>
-    delegate(document, `a, ${idempotentFormSelector}`, event, prefetch),
+    delegate(
+      document,
+      `${anchorSelector}, ${idempotentFormSelector}`,
+      event,
+      prefetch,
+    ),
   );
 
-  delegate(document, "a", "click", startVisit);
+  delegate(document, anchorSelector, "click", startVisit);
 
   delegate(document, idempotentFormSelector, "submit", startVisit);
 
-  delegate(document, idempotentFormSelector, "keyup", prefetch);
+  if (onkeyup) {
+    delegate(
+      document,
+      idempotentFormSelector,
+      "keyup",
+      debounce(prefetch, keyupDebounce),
+    );
+  }
 
   /** IDEA: Preload images and SVG files on mouse down and touch start? */
 };
