@@ -23,7 +23,7 @@ export const goFast = ({
   onkeyup = true,
   idempotentFormSelector = 'form:not([method="post"])',
   anchorSelector = "a",
-}) => {
+} = {}) => {
   (["mouseover", "touchstart"] as const).forEach((event) =>
     delegate(
       document,
