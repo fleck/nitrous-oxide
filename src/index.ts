@@ -18,13 +18,17 @@ export const visitFrame = (response: Response, frameId: string) =>
     );
 
 export const goFast = () => {
-  const eligibleForPrefetch = 'a, form:not([method="post"])';
+  const idempotentFormSelector = 'form:not([method="post"])';
 
   (["mouseover", "touchstart"] as const).forEach((event) =>
-    delegate(document, eligibleForPrefetch, event, prefetch),
+    delegate(document, `a, ${idempotentFormSelector}`, event, prefetch),
   );
 
-  delegate(document, eligibleForPrefetch, "click", startVisit);
+  delegate(document, "a", "click", startVisit);
+
+  delegate(document, idempotentFormSelector, "submit", startVisit);
+
+  delegate(document, idempotentFormSelector, "keyup", prefetch);
 
   /** IDEA: Preload images and SVG files on mouse down and touch start? */
 };
