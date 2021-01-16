@@ -1,22 +1,24 @@
 import delegate from "delegate-it";
-import { visit } from "@hotwired/turbo";
-import type { FrameElement } from "@hotwired/turbo/dist/types/elements/frame_element";
+import { visit, navigator } from "@hotwired/turbo";
 import mem from "mem";
 import debounce from "lodash/debounce";
+import type { FrameElement } from "@hotwired/turbo/dist/types/elements/frame_element";
+import type { Visit } from "@hotwired/turbo/dist/types/core/drive/visit";
+import type { FetchRequest } from "@hotwired/turbo/dist/types/http/fetch_request";
+import type { FetchResponse } from "@hotwired/turbo/dist/types/http/fetch_response";
 
+/** TODO: emulate stale-while-revalidate for safari. */
 const inflight = new Map<string, Promise<Response>>();
 
-export const visitFrame = (response: Response, frameId: string) =>
-  document
-    .querySelector<FrameElement>(`turbo-frame[id="${frameId}"]`)
-    ?.controller.requestSucceededWithResponse(
-      undefined as any,
-      {
-        get responseHTML() {
-          return response.text();
-        },
-      } as any,
-    );
+export const visitFrame = (response: Response, frame: FrameElement) =>
+  frame.controller.requestSucceededWithResponse(
+    {} as FetchRequest,
+    {
+      get responseHTML() {
+        return response.text();
+      },
+    } as FetchResponse,
+  );
 
 export const goFast = ({
   keyupDebounce = 150,
@@ -53,7 +55,6 @@ const startVisit = (event: delegate.Event<Event, Element>) => {
   if (disabled(event)) return;
 
   const url = extractURLFrom(event.delegateTarget);
-
   if (!url) return;
 
   const inflightRequest = inflight.get(url);
@@ -61,11 +62,25 @@ const startVisit = (event: delegate.Event<Event, Element>) => {
 
   event.preventDefault();
 
-  inflightRequest.then((response) => {
-    const frameId = event.delegateTarget.getAttribute("data-turbo-frame");
+  const turboFrame = document.querySelector<FrameElement>(
+    `turbo-frame[id="${event.delegateTarget.getAttribute(
+      "data-turbo-frame",
+    )}"]`,
+  );
 
-    if (frameId) {
-      visitFrame(response, frameId);
+  if (turboFrame) {
+    turboFrame.controller.requestStarted({} as FetchRequest);
+  } else {
+    navigator.adapter.visitRequestStarted({
+      hasCachedSnapshot: () => true,
+    } as Visit);
+  }
+
+  inflightRequest.then((response) => {
+    if (turboFrame) {
+      visitFrame(response, turboFrame);
+      turboFrame.controller.requestFinished({} as FetchRequest);
+
       return;
     }
 
