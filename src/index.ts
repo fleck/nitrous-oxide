@@ -7,6 +7,8 @@ import type { Visit } from "@hotwired/turbo/dist/types/core/drive/visit";
 import type { FetchRequest } from "@hotwired/turbo/dist/types/http/fetch_request";
 import type { FetchResponse } from "@hotwired/turbo/dist/types/http/fetch_response";
 
+export type { FrameElement };
+
 /** TODO: emulate stale-while-revalidate for safari. */
 const inflight = new Map<string, Promise<Response>>();
 
