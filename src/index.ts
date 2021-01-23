@@ -74,7 +74,7 @@ const startVisit = (event: delegate.Event<Event, Element>) => {
     turboFrame.controller.requestStarted({} as FetchRequest);
   } else {
     navigator.adapter.visitRequestStarted({
-      hasCachedSnapshot: () => true,
+      hasCachedSnapshot: () => false,
     } as Visit);
   }
 
@@ -85,6 +85,8 @@ const startVisit = (event: delegate.Event<Event, Element>) => {
 
       return;
     }
+
+    navigator.adapter.visitRequestFinished({} as Visit);
 
     response.text().then((responseHTML) => {
       visit(url, {
