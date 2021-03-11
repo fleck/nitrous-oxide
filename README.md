@@ -12,7 +12,7 @@ npm i nitrous-oxide
 
 ```js
 import { start } from "@hotwired/turbo";
-import { goFast } from "../lib/nitrous-oxide";
+import { goFast } from "nitrous-oxide";
 start();
 goFast();
 ```
