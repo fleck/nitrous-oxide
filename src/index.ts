@@ -2,17 +2,17 @@ import delegate from "delegate-it";
 import { visit, navigator } from "@hotwired/turbo";
 import mem from "mem";
 import debounce from "lodash/debounce";
-import type { FrameElement } from "@hotwired/turbo/dist/types/elements/frame_element";
 import type { Visit } from "@hotwired/turbo/dist/types/core/drive/visit";
 import type { FetchRequest } from "@hotwired/turbo/dist/types/http/fetch_request";
 import type { FetchResponse } from "@hotwired/turbo/dist/types/http/fetch_response";
+import type { FrameController } from "@hotwired/turbo/dist/types/core/frames/frame_controller";
 
-export type { FrameElement };
+export type FrameElement = { delegate: FrameController } & Element;
 
 const inflight = new Map<string, Promise<Response>>();
 
 export const visitFrame = (response: Response, frame: FrameElement) =>
-  frame.controller.requestSucceededWithResponse(
+  frame.delegate.requestSucceededWithResponse(
     {} as FetchRequest,
     {
       get responseHTML() {
@@ -70,7 +70,7 @@ const startVisit = (event: delegate.Event<Event, Element>) => {
   );
 
   if (turboFrame) {
-    turboFrame.controller.requestStarted({} as FetchRequest);
+    turboFrame.delegate.requestStarted({} as FetchRequest);
   } else {
     navigator.adapter.visitRequestStarted({
       hasCachedSnapshot: () => false,
@@ -80,7 +80,7 @@ const startVisit = (event: delegate.Event<Event, Element>) => {
   inflightRequest.then((response) => {
     if (turboFrame) {
       visitFrame(response, turboFrame);
-      turboFrame.controller.requestFinished({} as FetchRequest);
+      turboFrame.delegate.requestFinished({} as FetchRequest);
 
       return;
     }
