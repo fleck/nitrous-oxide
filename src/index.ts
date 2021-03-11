@@ -9,7 +9,6 @@ import type { FetchResponse } from "@hotwired/turbo/dist/types/http/fetch_respon
 
 export type { FrameElement };
 
-/** TODO: emulate stale-while-revalidate for safari. */
 const inflight = new Map<string, Promise<Response>>();
 
 export const visitFrame = (response: Response, frame: FrameElement) =>
@@ -91,7 +90,6 @@ const startVisit = (event: delegate.Event<Event, Element>) => {
     response.text().then((responseHTML) => {
       visit(url, {
         response: { statusCode: response.status, responseHTML },
-        action: "replace",
       });
     });
   });
