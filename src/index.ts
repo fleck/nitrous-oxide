@@ -101,7 +101,7 @@ export const turboFetch = (url: string, frameId: string | null) =>
   memoizedFetch(url, {
     credentials: "include",
     headers: {
-      accept: "text/html; turbo-stream, text/html, application/xhtml+xml",
+      accept: "text/html, application/xhtml+xml",
       ...(frameId ? { "turbo-frame": frameId } : {}),
     },
   });
